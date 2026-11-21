@@ -40,6 +40,14 @@ protected:
                                    PatchDescriptor::Type  patchType,
                                    SparseMatrix<double> & matrix) const;
 
+    //  Exact BSpline -> Bezier change of basis for regular quad patches:
+    virtual int convertRegularPatchToPatchType(
+            PatchDescriptor::Type patchType, int regBoundaryMask,
+            SparseMatrix<float> & matrix) const;
+    virtual int convertRegularPatchToPatchType(
+            PatchDescriptor::Type patchType, int regBoundaryMask,
+            SparseMatrix<double> & matrix) const;
+
 private:
     typedef SparseMatrix<float>   ConversionMatrix;
 

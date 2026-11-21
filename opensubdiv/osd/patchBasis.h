@@ -1529,6 +1529,31 @@ OsdEvaluatePatchBasisNormalized(
             wDss[i] = wDss3[i]; wDst[i] = wDst3[i]; wDtt[i] = wDtt3[i];
         }
 #endif
+    } else if (patchType == OSD_PATCH_DESCRIPTOR_BEZIER) {
+#if OSD_ARRAY_ARG_BOUND_OPTIONAL
+        //  Bezier patches are converted from the native BSpline
+        //  representation with phantom boundary slots filled by vertex
+        //  copies, so the identical phantom-weight redistribution applies:
+        nPoints = Osd_EvalBasisBezier(s, t, wP, wDs, wDt, wDss, wDst, wDtt);
+        if (boundaryMask != 0) {
+            Osd_boundBasisBSpline(
+                boundaryMask, wP, wDs, wDt, wDss, wDst, wDtt);
+        }
+#else
+        OSD_REAL wP16[16], wDs16[16], wDt16[16],
+                 wDss16[16], wDst16[16], wDtt16[16];
+        nPoints = Osd_EvalBasisBezier(
+                s, t, wP16, wDs16, wDt16, wDss16, wDst16, wDtt16);
+        if (boundaryMask != 0) {
+            Osd_boundBasisBSpline(
+                boundaryMask, wP16, wDs16, wDt16, wDss16, wDst16, wDtt16);
+        }
+        for (int i=0; i<nPoints; ++i) {
+            wP[i] = wP16[i];
+            wDs[i] = wDs16[i]; wDt[i] = wDt16[i];
+            wDss[i] = wDss16[i]; wDst[i] = wDst16[i]; wDtt[i] = wDtt16[i];
+        }
+#endif
     } else {
         // assert(0);
     }

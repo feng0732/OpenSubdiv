@@ -227,6 +227,7 @@ typedef struct OsdPatchCoord OsdPatchCoord;
 #define OSD_PATCH_DESCRIPTOR_REGULAR          6
 #define OSD_PATCH_DESCRIPTOR_GREGORY_BASIS    9
 #define OSD_PATCH_DESCRIPTOR_GREGORY_TRIANGLE 10
+#define OSD_PATCH_DESCRIPTOR_BEZIER           11
 
 // Osd reflection of Osd::PatchCoord
 struct OsdPatchCoord {

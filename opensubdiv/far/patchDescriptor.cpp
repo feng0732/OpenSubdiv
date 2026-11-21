@@ -39,6 +39,7 @@ PatchDescriptor::GetAdaptivePatchDescriptors(Sdc::SchemeType type) {
         PatchDescriptor(GREGORY),
         PatchDescriptor(GREGORY_BOUNDARY),
         PatchDescriptor(GREGORY_BASIS),
+        PatchDescriptor(BEZIER),
     };
 
     switch (type) {
@@ -58,10 +59,10 @@ PatchDescriptor::GetAdaptivePatchDescriptors(Sdc::SchemeType type) {
 
 void
 PatchDescriptor::print() const {
-    static char const * types[13] = {
+    static char const * types[12] = {
         "NON_PATCH", "POINTS", "LINES", "QUADS", "TRIANGLES", "LOOP",
             "REGULAR", "GREGORY", "GREGORY_BOUNDARY", "GREGORY_BASIS",
-            "GREGORY_TRIANGLE"};
+            "GREGORY_TRIANGLE", "BEZIER"};
 
     printf("    type %s\n",
         types[_type]);

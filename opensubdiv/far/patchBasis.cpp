@@ -1305,6 +1305,15 @@ EvaluatePatchBasisNormalized(int patchType, PatchParam const & param, REAL s, RE
         nPoints = EvalBasisLinear(s, t, wP, wDs, wDt, wDss, wDst, wDtt);
     } else if (patchType == PatchDescriptor::TRIANGLES) {
         nPoints = EvalBasisLinearTri(s, t, wP, wDs, wDt, wDss, wDst, wDtt);
+    } else if (patchType == PatchDescriptor::BEZIER) {
+        //  Bezier patches are converted from the native BSpline
+        //  representation with phantom boundary slots filled by vertex
+        //  copies, so the identical phantom-weight redistribution applies:
+        nPoints = EvalBasisBezier(s, t, wP, wDs, wDt, wDss, wDst, wDtt);
+        if (boundaryMask != 0) {
+            boundBasisBSpline(
+                boundaryMask, wP, wDs, wDt, wDss, wDst, wDtt);
+        }
     } else {
         assert(0);
     }

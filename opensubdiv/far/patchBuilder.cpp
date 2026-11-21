@@ -1240,6 +1240,53 @@ template int PatchBuilder::GetIrregularPatchConversionMatrix<double>(
         SparseMatrix<double> & conversionMatrix) const;
 
 
+//
+//  Regular patches are natively represented in the scheme's regular basis
+//  (BSpline for Catmark).  When the requested regular patch type differs
+//  (currently only Bezier for Catmark), defer to the scheme-specific
+//  virtual conversion, which applies an exact change of basis to the 16
+//  native control points returned by GetRegularPatchPoints().
+//
+template <typename REAL>
+int
+PatchBuilder::GetRegularPatchConversionMatrix(
+        int levelIndex, Index faceIndex,
+        int regBoundaryMask, SparseMatrix<REAL> & conversionMatrix) const {
+
+    (void) levelIndex;
+    (void) faceIndex;
+
+    if (_regPatchType == _nativePatchType) {
+        return 0;
+    }
+
+    return convertRegularPatchToPatchType(
+        _regPatchType, regBoundaryMask, conversionMatrix);
+}
+template int PatchBuilder::GetRegularPatchConversionMatrix<float>(
+        int levelIndex, Index faceIndex, int regBoundaryMask,
+        SparseMatrix<float> & conversionMatrix) const;
+template int PatchBuilder::GetRegularPatchConversionMatrix<double>(
+        int levelIndex, Index faceIndex, int regBoundaryMask,
+        SparseMatrix<double> & conversionMatrix) const;
+
+
+//
+//  Default: no regular change of basis available -- schemes that support
+//  one (Catmark for Bezier) override this.
+//
+int
+PatchBuilder::convertRegularPatchToPatchType(
+        PatchDescriptor::Type, int, SparseMatrix<float> &) const {
+    return 0;
+}
+int
+PatchBuilder::convertRegularPatchToPatchType(
+        PatchDescriptor::Type, int, SparseMatrix<double> &) const {
+    return 0;
+}
+
+
 bool
 PatchBuilder::IsRegularSingleCreasePatch(int levelIndex, Index faceIndex,
         SingleCreaseInfo & creaseInfo) const {

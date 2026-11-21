@@ -15,6 +15,8 @@ if (NOT NO_REGRESSION)
 
     add_subdirectory(far_regression)
 
+    add_subdirectory(far_bezier)
+
     add_subdirectory(far_perf)
 
     if(OPENGL_FOUND AND GLFW_FOUND)

@@ -390,7 +390,26 @@ PatchTableBuilder::PatchTableBuilder(
     //
     PatchBuilder::Options patchOptions;
 
-    patchOptions.regBasisType = PatchBuilder::BASIS_REGULAR;
+    bool useBezierBasis = (_options.GetEndCapType() == Options::ENDCAP_BEZIER_BASIS);
+
+    //
+    //  A bicubic Bezier representation is only available for the
+    //  Catmull-Clark (quad) scheme.  Loop produces triangular patches and
+    //  Bilinear has no higher-order basis to convert from.  Rather than
+    //  silently producing patches whose control points have no valid Bezier
+    //  semantics, report the unsupported combination and fall back to the
+    //  default Gregory end-cap so that the table remains usable and
+    //  diagnosable.
+    //
+    if (useBezierBasis && (_refiner.GetSchemeType() != Sdc::SCHEME_CATMARK)) {
+        Warning("PatchTableFactory: ENDCAP_BEZIER_BASIS is only supported "
+                "for the Catmark scheme -- falling back to Gregory end-caps");
+        useBezierBasis = false;
+    }
+
+    patchOptions.regBasisType = useBezierBasis
+                              ? PatchBuilder::BASIS_BEZIER
+                              : PatchBuilder::BASIS_REGULAR;
     switch (_options.GetEndCapType()) {
         case Options::ENDCAP_BILINEAR_BASIS:
             patchOptions.irregBasisType = PatchBuilder::BASIS_LINEAR;
@@ -400,6 +419,11 @@ PatchTableBuilder::PatchTableBuilder(
             break;
         case Options::ENDCAP_GREGORY_BASIS:
             patchOptions.irregBasisType = PatchBuilder::BASIS_GREGORY;
+            break;
+        case Options::ENDCAP_BEZIER_BASIS:
+            patchOptions.irregBasisType = useBezierBasis
+                                        ? PatchBuilder::BASIS_BEZIER
+                                        : PatchBuilder::BASIS_GREGORY;
             break;
         default:
             //  The PatchBuilder will infer if left un-specified
@@ -491,7 +515,15 @@ PatchTableBuilder::identifyPatchTopology(PatchTuple const & patch,
 
         //  If converting to another basis, get the change-of-basis matrix:
         if (_requiresRegularLocalPoints) {
-            // _patchBuilder->GetRegularConversionMatrix(...);
+            if (useDoubleMatrix) {
+                _patchBuilder->GetRegularPatchConversionMatrix(
+                    patchLevel, patchFace, patchInfo.regBoundaryMask,
+                    patchInfo.dMatrix);
+            } else {
+                _patchBuilder->GetRegularPatchConversionMatrix(
+                    patchLevel, patchFace, patchInfo.regBoundaryMask,
+                    patchInfo.fMatrix);
+            }
         }
 
         //
@@ -583,25 +615,41 @@ PatchTableBuilder::assignPatchPointsAndStencils(PatchTuple const & patch,
             offsetIndices(patchPoints, numPatchPoints, sourcePointOffset);
         } else {
             //
-            //  Future support for regular patches converted to another basis.
-            //  Note the "source points" are not returned in the same
-            //  orientation and there may be fewer than expected number in the
-            //  case of boundaries:
-            /*
-            StackBuffer<Index,64,true> sourcePoints(
-                patchInfo.matrix.GetNumColumns());
-
-            _patchBuilder->GetRegularPatchSourcePoints(
+            //  The regular patch is being converted to a non-native basis
+            //  (currently only Bezier).  GetRegularPatchPoints() returns the
+            //  16 native control points in the same orientation as the rows
+            //  of the change-of-basis matrix, so they serve directly as the
+            //  source points for the local-point stencils.  They are
+            //  level-local indices here -- the level offset is applied by
+            //  AppendLocalPatchPoints() via sourcePointOffset.
+            //
+            //  Boundary patches may contain repeated indices where phantom
+            //  control points were filled with copies of a boundary vertex.
+            //  The basis evaluator applies the standard phantom-weight
+            //  redistribution for Bezier patches just as it does for the
+            //  native BSpline patches, so the repeated indices are valid.
+            //
+            int numNativePoints = _patchBuilder->GetRegularPatchPoints(
                     patch.levelIndex, patch.faceIndex,
-                    patchInfo.regBoundaryMask, sourcePoints, fvarInRefiner);
+                    patchInfo.regBoundaryMask, patchPoints, fvarInRefiner);
 
-            localHelper.AppendLocalPatchPoints(
-                    patch.levelIndex, patch.faceIndex,
-                    patchInfo.matrix, _patchBuilder->GetRegularPatchType(),
-                    sourcePoints, sourcePointOffset, patchPoints);
+            StackBuffer<Index, 64, true> sourcePoints(numNativePoints);
+            std::memcpy(&sourcePoints[0], patchPoints,
+                        numNativePoints * sizeof(Index));
 
-            numPatchPoints = patchInfo.matrix.GetNumRows();
-            */
+            if (useDoubleMatrix) {
+                localHelper.AppendLocalPatchPoints(
+                        patch.levelIndex, patch.faceIndex,
+                        patchInfo.dMatrix, _patchBuilder->GetRegularPatchType(),
+                        sourcePoints, sourcePointOffset, patchPoints);
+                numPatchPoints = patchInfo.dMatrix.GetNumRows();
+            } else {
+                localHelper.AppendLocalPatchPoints(
+                        patch.levelIndex, patch.faceIndex,
+                        patchInfo.fMatrix, _patchBuilder->GetRegularPatchType(),
+                        sourcePoints, sourcePointOffset, patchPoints);
+                numPatchPoints = patchInfo.fMatrix.GetNumRows();
+            }
         }
     } else if (_requiresIrregularLocalPoints) {
         int numSourcePoints = 0;
@@ -1635,6 +1683,10 @@ namespace {
         } else if (type == PatchDescriptor::GREGORY_TRIANGLE) {
             return gregoryTriIndices;
         } else if (type == PatchDescriptor::REGULAR) {
+            return bsplineIndices;
+        } else if (type == PatchDescriptor::BEZIER) {
+            //  Bezier and BSpline quad patches share the same 4x4 layout of
+            //  corner-associated varying values:
             return bsplineIndices;
         } else if (type == PatchDescriptor::LOOP) {
             return boxsplineIndices;

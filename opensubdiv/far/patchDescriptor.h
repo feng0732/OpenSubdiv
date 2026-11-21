@@ -43,7 +43,9 @@ public:
         GREGORY,
         GREGORY_BOUNDARY,
         GREGORY_BASIS,
-        GREGORY_TRIANGLE
+        GREGORY_TRIANGLE,
+
+        BEZIER             ///< bicubic Bezier patch (Catmark quad patches only)
     };
 
 public:
@@ -133,6 +135,7 @@ inline short
 PatchDescriptor::GetNumControlVertices( Type type ) {
     switch (type) {
         case REGULAR           : return GetRegularPatchSize();
+        case BEZIER            : return 16;
         case LOOP              : return 12;
         case QUADS             : return 4;
         case GREGORY           :

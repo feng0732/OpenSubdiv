@@ -225,6 +225,18 @@ public:
             Vtr::internal::Level::VSpan const cornerSpans[],
             SparseMatrix<REAL> &              matrix) const;
 
+    //
+    //  Conversion matrix for a regular patch to a non-native basis (e.g.
+    //  Bezier).  The 16 native (BSpline) control point indices returned by
+    //  GetRegularPatchPoints() are the source points for the matrix, which
+    //  has 16 rows (one per converted patch point).  Returns the number of
+    //  rows, or 0 when the regular patch type is the native basis (no
+    //  change of basis required).
+    //
+    template <typename REAL>
+    int GetRegularPatchConversionMatrix(int level, Index face,
+            int regBoundaryMask, SparseMatrix<REAL> & matrix) const;
+
     int GetIrregularPatchSourcePoints(int level, Index face,
             Vtr::internal::Level::VSpan const cornerSpans[],
             Index                             sourcePoints[],
@@ -290,6 +302,23 @@ protected:
     virtual int convertToPatchType(SourcePatch const &    sourcePatch,
                                    PatchDescriptor::Type  patchType,
                                    SparseMatrix<double> & matrix) const = 0;
+
+    //
+    //  Conversion of the 16 native control points of a regular quad patch
+    //  (as returned by GetRegularPatchPoints()) to the requested regular
+    //  patch type.  regBoundaryMask identifies phantom boundary slots using
+    //  the PatchParam boundary-mask convention.  Returns the number of rows
+    //  in the matrix (16) when a conversion is available, or 0 when the
+    //  regular patch type is the native basis (no change of basis required)
+    //  or no regular conversion exists for the scheme.  Overridden by
+    //  Catmark for the Bezier basis.
+    //
+    virtual int convertRegularPatchToPatchType(
+            PatchDescriptor::Type patchType, int regBoundaryMask,
+            SparseMatrix<float> & matrix) const;
+    virtual int convertRegularPatchToPatchType(
+            PatchDescriptor::Type patchType, int regBoundaryMask,
+            SparseMatrix<double> & matrix) const;
 
 protected:
     TopologyRefiner const& _refiner;

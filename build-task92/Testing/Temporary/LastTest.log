@@ -1,0 +1,505 @@
+Start testing: Nov 21 22:16 UTC
+----------------------------------------------------------
+1/6 Testing: bfr_evaluate_pos
+1/6 Test: bfr_evaluate_pos
+Command: "/srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/bin/bfr_evaluate" "-all" "-silent" "-l" "3" "-pass" "2" "-d1"
+Directory: /srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/regression/bfr_evaluate
+"bfr_evaluate_pos" start time: Nov 21 22:16 UTC
+Output:
+----------------------------------------------------------
+'catmark_chaikin1':
+		POS diffs:     1 faces, max delta P  = 0.00195315
+		 D1 diffs:     1 faces, max delta D1 = 0.0142899
+'loop_chaikin1':
+		POS diffs:     6 faces, max delta P  = 0.00165126
+		 D1 diffs:     6 faces, max delta D1 = 0.0379248
+<end of output>
+Test time =   0.37 sec
+----------------------------------------------------------
+Test Passed.
+"bfr_evaluate_pos" end time: Nov 21 22:16 UTC
+"bfr_evaluate_pos" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/6 Testing: bfr_evaluate_uv1
+2/6 Test: bfr_evaluate_uv1
+Command: "/srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/bin/bfr_evaluate" "-all" "-silent" "-l" "3" "-pass" "0" "-skippos" "-uv" "-uvint" "1"
+Directory: /srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/regression/bfr_evaluate
+"bfr_evaluate_uv1" start time: Nov 21 22:16 UTC
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.45 sec
+----------------------------------------------------------
+Test Passed.
+"bfr_evaluate_uv1" end time: Nov 21 22:16 UTC
+"bfr_evaluate_uv1" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/6 Testing: bfr_evaluate_uv5
+3/6 Test: bfr_evaluate_uv5
+Command: "/srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/bin/bfr_evaluate" "-all" "-silent" "-l" "3" "-pass" "0" "-skippos" "-uv" "-uvint" "5"
+Directory: /srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/regression/bfr_evaluate
+"bfr_evaluate_uv5" start time: Nov 21 22:16 UTC
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.30 sec
+----------------------------------------------------------
+Test Passed.
+"bfr_evaluate_uv5" end time: Nov 21 22:16 UTC
+"bfr_evaluate_uv5" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/6 Testing: far_regression
+4/6 Test: far_regression
+Command: "/srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/bin/far_regression"
+Directory: /srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/regression/far_regression
+"far_regression" start time: Nov 21 22:16 UTC
+Output:
+----------------------------------------------------------
+precision : 0.000001
+- bilinear_cube             ( Bilinear ): 
+  delta ratio : (0/8202 0/8202 0/8202)
+  average delta : (0.0000000000 0.0000000000 0.0000000000)
+  success !
+- catmark_cube_corner0      ( Catmark  ): 
+  delta ratio : (2444/8202 2527/8202 2857/8202)
+  average delta : (-0.0000000013 -0.0000000031 0.0000000008)
+  success !
+- catmark_cube_corner1      ( Catmark  ): 
+  delta ratio : (2444/8202 2388/8202 2690/8202)
+  average delta : (-0.0000000013 -0.0000000074 0.0000000017)
+  success !
+- catmark_cube_corner2      ( Catmark  ): 
+  delta ratio : (2444/8202 2367/8202 2732/8202)
+  average delta : (-0.0000000013 -0.0000000103 0.0000000037)
+  success !
+- catmark_cube_corner3      ( Catmark  ): 
+  delta ratio : (2444/8202 2374/8202 2745/8202)
+  average delta : (-0.0000000013 -0.0000000099 0.0000000051)
+  success !
+- catmark_cube_corner4      ( Catmark  ): 
+  delta ratio : (2444/8202 2373/8202 2741/8202)
+  average delta : (-0.0000000013 -0.0000000098 0.0000000050)
+  success !
+- catmark_cube_creases0     ( Catmark  ): 
+  delta ratio : (2776/8202 2874/8202 2638/8202)
+  average delta : (-0.0000000133 -0.0000000088 -0.0000000097)
+  success !
+- catmark_cube_creases1     ( Catmark  ): 
+  delta ratio : (1792/8202 2148/8202 0/8202)
+  average delta : (-0.0000000096 0.0000000254 0.0000000000)
+  success !
+- catmark_cube              ( Catmark  ): 
+  delta ratio : (2444/8202 2569/8202 2773/8202)
+  average delta : (-0.0000000013 -0.0000000141 0.0000000003)
+  success !
+- catmark_dart_edgecorner   ( Catmark  ): 
+  delta ratio : (0/22350 0/22350 713/22350)
+  average delta : (0.0000000000 0.0000000000 -0.0000000014)
+  success !
+- catmark_dart_edgeonly     ( Catmark  ): 
+  delta ratio : (261/22350 258/22350 713/22350)
+  average delta : (-0.0000000018 0.0000000000 -0.0000000014)
+  success !
+- catmark_edgecorner        ( Catmark  ): 
+  delta ratio : (12156/39504 1210/39504 13465/39504)
+  average delta : (0.0000000266 -0.0000000037 0.0000000001)
+  success !
+- catmark_edgeonly          ( Catmark  ): 
+  delta ratio : (8680/28332 208/28332 9354/28332)
+  average delta : (0.0000000141 -0.0000000001 0.0000000145)
+  success !
+- catmark_chaikin0          ( Catmark  ): 
+  delta ratio : (6289/30042 0/30042 0/30042)
+  average delta : (-0.0000000048 0.0000000000 0.0000000000)
+  success !
+- catmark_chaikin1          ( Catmark  ): 
+  warning : vertex data not compared with Hbr (assigned crease method is Chaikin)
+- catmark_chaikin2          ( Catmark  ): 
+  warning : vertex data not compared with Hbr (assigned crease method is Chaikin)
+- catmark_fan               ( Catmark  ): 
+  warning : vertex data not compared with Hbr (mesh is non-manifold)
+- catmark_flap              ( Catmark  ): 
+  delta ratio : (1430/4353 1815/4353 1707/4353)
+  average delta : (0.0000000009 0.0000000194 0.0000000226)
+  success !
+- catmark_flap2             ( Catmark  ): 
+  delta ratio : (275/5781 0/5781 0/5781)
+  average delta : (0.0000000004 0.0000000000 0.0000000000)
+  success !
+- catmark_gregory_test1     ( Catmark  ): 
+  delta ratio : (3412/9687 3638/9687 3494/9687)
+  average delta : (-0.0000000074 -0.0000000095 -0.0000000039)
+  success !
+- catmark_gregory_test2     ( Catmark  ): 
+  delta ratio : (1735/5408 0/5408 1559/5408)
+  average delta : (0.0000000048 0.0000000000 0.0000000031)
+  success !
+- catmark_gregory_test3     ( Catmark  ): 
+  delta ratio : (658/9939 609/9939 3576/9939)
+  average delta : (-0.0000000074 0.0000000070 0.0000000316)
+  success !
+- catmark_gregory_test4     ( Catmark  ): 
+  warning : vertex data not compared with Hbr (mesh is non-manifold)
+- catmark_gregory_test5     ( Catmark  ): 
+  delta ratio : (6200/16145 5823/16145 5562/16145)
+  average delta : (-0.0000000061 -0.0000000031 0.0000000037)
+  success !
+- catmark_pole8             ( Catmark  ): 
+  delta ratio : (6635/19366 7088/19366 6498/19366)
+  average delta : (-0.0000000002 -0.0000000017 -0.0000000008)
+  success !
+- catmark_pole64            ( Catmark  ): 
+  delta ratio : (56501/154886 56592/154886 55975/154886)
+  average delta : (-0.0000000002 -0.0000000017 0.0000000001)
+  success !
+- catmark_pole360           ( Catmark  ): 
+  warning : vertex data not compared with Hbr (vertices of excessively high valence present)
+- catmark_pyramid_creases0  ( Catmark  ): 
+  delta ratio : (1399/5471 1386/5471 1666/5471)
+  average delta : (0.0000000001 0.0000000004 0.0000000271)
+  success !
+- catmark_pyramid_creases1  ( Catmark  ): 
+  delta ratio : (1751/5471 1655/5471 1470/5471)
+  average delta : (0.0000000001 -0.0000000071 -0.0000000248)
+  success !
+- catmark_pyramid           ( Catmark  ): 
+  delta ratio : (1931/5471 2183/5471 1818/5471)
+  average delta : (0.0000000024 -0.0000000018 -0.0000000198)
+  success !
+- catmark_square_hedit0     ( Catmark  ): 
+  warning : vertex data not compared with Hbr (hierarchical edits no longer supported)
+- catmark_square_hedit1     ( Catmark  ): 
+  warning : vertex data not compared with Hbr (hierarchical edits no longer supported)
+- catmark_square_hedit2     ( Catmark  ): 
+  warning : vertex data not compared with Hbr (hierarchical edits no longer supported)
+- catmark_square_hedit3     ( Catmark  ): 
+  warning : vertex data not compared with Hbr (hierarchical edits no longer supported)
+- catmark_tent_creases0     ( Catmark  ): 
+  delta ratio : (3916/12669 4088/12669 2156/12669)
+  average delta : (0.0000000153 0.0000000196 -0.0000000053)
+  success !
+- catmark_tent_creases1     ( Catmark  ): 
+  delta ratio : (3877/12669 4069/12669 2053/12669)
+  average delta : (0.0000000158 0.0000000197 -0.0000000009)
+  success !
+- catmark_tent              ( Catmark  ): 
+  delta ratio : (4077/12669 4494/12669 1483/12669)
+  average delta : (0.0000000044 0.0000000069 -0.0000000029)
+  success !
+- catmark_torus             ( Catmark  ): 
+  delta ratio : (15675/43680 20666/43680 15854/43680)
+  average delta : (-0.0000000028 -0.0000000006 -0.0000000032)
+  success !
+- catmark_torus_creases0    ( Catmark  ): 
+  delta ratio : (16403/43680 18625/43680 16458/43680)
+  average delta : (-0.0000000028 0.0000000095 -0.0000000030)
+  success !
+- catmark_helmet            ( Catmark  ): 
+  delta ratio : (27798/79995 27179/79995 25506/79995)
+  average delta : (0.0000000028 -0.0000000088 0.0000000019)
+  success !
+- catmark_lefthanded        ( Catmark  ): 
+  warning : vertex data not compared with Hbr (mesh is left-handed)
+- loop_cube_creases0        ( Loop     ): 
+  delta ratio : (2168/8202 2365/8202 2076/8202)
+  average delta : (0.0000000013 0.0000000200 0.0000000050)
+  success !
+- loop_cube_creases1        ( Loop     ): 
+  delta ratio : (2183/8202 2126/8202 929/8202)
+  average delta : (0.0000000030 -0.0000000039 -0.0000000250)
+  success !
+- loop_cube                 ( Loop     ): 
+  delta ratio : (0/16392 0/16392 0/16392)
+  average delta : (0.0000000000 0.0000000000 0.0000000000)
+  success !
+- loop_icosahedron          ( Loop     ): 
+  delta ratio : (4804/13662 4636/13662 4232/13662)
+  average delta : (0.0000000000 0.0000000003 0.0000000017)
+  success !
+- loop_pole8                ( Loop     ): 
+  delta ratio : (5397/16638 6726/16638 5150/16638)
+  average delta : (-0.0000000009 0.0000000503 0.0000000028)
+  success !
+- loop_pole64               ( Loop     ): 
+  delta ratio : (44464/133062 53063/133062 44730/133062)
+  average delta : (-0.0000000001 0.0000000522 -0.0000000001)
+  success !
+- loop_pole360              ( Loop     ): 
+  warning : vertex data not compared with Hbr (vertices of excessively high valence present)
+- loop_saddle_edgecorner    ( Loop     ): 
+  delta ratio : (613/2925 1234/2925 0/2925)
+  average delta : (0.0000000024 -0.0000000149 0.0000000000)
+  success !
+- loop_saddle_edgeonly      ( Loop     ): 
+  delta ratio : (771/2925 1398/2925 0/2925)
+  average delta : (0.0000000004 -0.0000000188 0.0000000000)
+  success !
+- loop_triangle_edgecorner  ( Loop     ): 
+  delta ratio : (0/34695 0/34695 0/34695)
+  average delta : (0.0000000000 0.0000000000 0.0000000000)
+  success !
+- loop_triangle_edgeonly    ( Loop     ): 
+  delta ratio : (0/24174 0/24174 0/24174)
+  average delta : (0.0000000000 0.0000000000 0.0000000000)
+  success !
+- loop_chaikin0             ( Loop     ): 
+  delta ratio : (4418/30042 0/30042 0/30042)
+  average delta : (0.0000000009 0.0000000000 0.0000000000)
+  success !
+- loop_chaikin1             ( Loop     ): 
+  warning : vertex data not compared with Hbr (assigned crease method is Chaikin)
+All tests passed.
+<end of output>
+Test time =   2.16 sec
+----------------------------------------------------------
+Test Passed.
+"far_regression" end time: Nov 21 22:16 UTC
+"far_regression" time elapsed: 00:00:02
+----------------------------------------------------------
+
+5/6 Testing: far_bezier
+5/6 Test: far_bezier
+Command: "/srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/bin/far_bezier"
+Directory: /srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/regression/far_bezier
+"far_bezier" start time: Nov 21 22:16 UTC
+Output:
+----------------------------------------------------------
+Running Far Bezier patch table regression tests:
+  Regular closed shape 'catmark_toroidal_tet' (exact conversion):
+  Boundary shape 'catmark_edgeonly':
+  Boundary shape 'catmark_edgecorner':
+  Boundary shape 'catmark_xord_boundary':
+  Extraordinary shape 'catmark_pyramid':
+  Extraordinary shape 'catmark_xord_interior':
+  Extraordinary shape 'catmark_pole8':
+  Catmark shape 'catmark_cube':
+  Catmark shape 'catmark_gregory_test0':
+  Catmark shape 'catmark_gregory_test5':
+  Catmark shape 'catmark_cubes_infsharp':
+  Catmark shape 'catmark_val2_interior':
+  Double-precision conversion path:
+  Face-varying Bezier table 'catmark_fvar_bound0':
+  Unsupported scheme fallback (Loop and Bilinear):
+
+63 checks, 0 failures
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"far_bezier" end time: Nov 21 22:16 UTC
+"far_bezier" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/6 Testing: far_perf
+6/6 Test: far_perf
+Command: "/srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/bin/far_regression"
+Directory: /srv/fb2/feng0732/0092-opensubdiv-3-e6df33b6/build-task92/regression/far_perf
+"far_perf" start time: Nov 21 22:16 UTC
+Output:
+----------------------------------------------------------
+precision : 0.000001
+- bilinear_cube             ( Bilinear ): 
+  delta ratio : (0/8202 0/8202 0/8202)
+  average delta : (0.0000000000 0.0000000000 0.0000000000)
+  success !
+- catmark_cube_corner0      ( Catmark  ): 
+  delta ratio : (2444/8202 2527/8202 2857/8202)
+  average delta : (-0.0000000013 -0.0000000031 0.0000000008)
+  success !
+- catmark_cube_corner1      ( Catmark  ): 
+  delta ratio : (2444/8202 2388/8202 2690/8202)
+  average delta : (-0.0000000013 -0.0000000074 0.0000000017)
+  success !
+- catmark_cube_corner2      ( Catmark  ): 
+  delta ratio : (2444/8202 2367/8202 2732/8202)
+  average delta : (-0.0000000013 -0.0000000103 0.0000000037)
+  success !
+- catmark_cube_corner3      ( Catmark  ): 
+  delta ratio : (2444/8202 2374/8202 2745/8202)
+  average delta : (-0.0000000013 -0.0000000099 0.0000000051)
+  success !
+- catmark_cube_corner4      ( Catmark  ): 
+  delta ratio : (2444/8202 2373/8202 2741/8202)
+  average delta : (-0.0000000013 -0.0000000098 0.0000000050)
+  success !
+- catmark_cube_creases0     ( Catmark  ): 
+  delta ratio : (2776/8202 2874/8202 2638/8202)
+  average delta : (-0.0000000133 -0.0000000088 -0.0000000097)
+  success !
+- catmark_cube_creases1     ( Catmark  ): 
+  delta ratio : (1792/8202 2148/8202 0/8202)
+  average delta : (-0.0000000096 0.0000000254 0.0000000000)
+  success !
+- catmark_cube              ( Catmark  ): 
+  delta ratio : (2444/8202 2569/8202 2773/8202)
+  average delta : (-0.0000000013 -0.0000000141 0.0000000003)
+  success !
+- catmark_dart_edgecorner   ( Catmark  ): 
+  delta ratio : (0/22350 0/22350 713/22350)
+  average delta : (0.0000000000 0.0000000000 -0.0000000014)
+  success !
+- catmark_dart_edgeonly     ( Catmark  ): 
+  delta ratio : (261/22350 258/22350 713/22350)
+  average delta : (-0.0000000018 0.0000000000 -0.0000000014)
+  success !
+- catmark_edgecorner        ( Catmark  ): 
+  delta ratio : (12156/39504 1210/39504 13465/39504)
+  average delta : (0.0000000266 -0.0000000037 0.0000000001)
+  success !
+- catmark_edgeonly          ( Catmark  ): 
+  delta ratio : (8680/28332 208/28332 9354/28332)
+  average delta : (0.0000000141 -0.0000000001 0.0000000145)
+  success !
+- catmark_chaikin0          ( Catmark  ): 
+  delta ratio : (6289/30042 0/30042 0/30042)
+  average delta : (-0.0000000048 0.0000000000 0.0000000000)
+  success !
+- catmark_chaikin1          ( Catmark  ): 
+  warning : vertex data not compared with Hbr (assigned crease method is Chaikin)
+- catmark_chaikin2          ( Catmark  ): 
+  warning : vertex data not compared with Hbr (assigned crease method is Chaikin)
+- catmark_fan               ( Catmark  ): 
+  warning : vertex data not compared with Hbr (mesh is non-manifold)
+- catmark_flap              ( Catmark  ): 
+  delta ratio : (1430/4353 1815/4353 1707/4353)
+  average delta : (0.0000000009 0.0000000194 0.0000000226)
+  success !
+- catmark_flap2             ( Catmark  ): 
+  delta ratio : (275/5781 0/5781 0/5781)
+  average delta : (0.0000000004 0.0000000000 0.0000000000)
+  success !
+- catmark_gregory_test1     ( Catmark  ): 
+  delta ratio : (3412/9687 3638/9687 3494/9687)
+  average delta : (-0.0000000074 -0.0000000095 -0.0000000039)
+  success !
+- catmark_gregory_test2     ( Catmark  ): 
+  delta ratio : (1735/5408 0/5408 1559/5408)
+  average delta : (0.0000000048 0.0000000000 0.0000000031)
+  success !
+- catmark_gregory_test3     ( Catmark  ): 
+  delta ratio : (658/9939 609/9939 3576/9939)
+  average delta : (-0.0000000074 0.0000000070 0.0000000316)
+  success !
+- catmark_gregory_test4     ( Catmark  ): 
+  warning : vertex data not compared with Hbr (mesh is non-manifold)
+- catmark_gregory_test5     ( Catmark  ): 
+  delta ratio : (6200/16145 5823/16145 5562/16145)
+  average delta : (-0.0000000061 -0.0000000031 0.0000000037)
+  success !
+- catmark_pole8             ( Catmark  ): 
+  delta ratio : (6635/19366 7088/19366 6498/19366)
+  average delta : (-0.0000000002 -0.0000000017 -0.0000000008)
+  success !
+- catmark_pole64            ( Catmark  ): 
+  delta ratio : (56501/154886 56592/154886 55975/154886)
+  average delta : (-0.0000000002 -0.0000000017 0.0000000001)
+  success !
+- catmark_pole360           ( Catmark  ): 
+  warning : vertex data not compared with Hbr (vertices of excessively high valence present)
+- catmark_pyramid_creases0  ( Catmark  ): 
+  delta ratio : (1399/5471 1386/5471 1666/5471)
+  average delta : (0.0000000001 0.0000000004 0.0000000271)
+  success !
+- catmark_pyramid_creases1  ( Catmark  ): 
+  delta ratio : (1751/5471 1655/5471 1470/5471)
+  average delta : (0.0000000001 -0.0000000071 -0.0000000248)
+  success !
+- catmark_pyramid           ( Catmark  ): 
+  delta ratio : (1931/5471 2183/5471 1818/5471)
+  average delta : (0.0000000024 -0.0000000018 -0.0000000198)
+  success !
+- catmark_square_hedit0     ( Catmark  ): 
+  warning : vertex data not compared with Hbr (hierarchical edits no longer supported)
+- catmark_square_hedit1     ( Catmark  ): 
+  warning : vertex data not compared with Hbr (hierarchical edits no longer supported)
+- catmark_square_hedit2     ( Catmark  ): 
+  warning : vertex data not compared with Hbr (hierarchical edits no longer supported)
+- catmark_square_hedit3     ( Catmark  ): 
+  warning : vertex data not compared with Hbr (hierarchical edits no longer supported)
+- catmark_tent_creases0     ( Catmark  ): 
+  delta ratio : (3916/12669 4088/12669 2156/12669)
+  average delta : (0.0000000153 0.0000000196 -0.0000000053)
+  success !
+- catmark_tent_creases1     ( Catmark  ): 
+  delta ratio : (3877/12669 4069/12669 2053/12669)
+  average delta : (0.0000000158 0.0000000197 -0.0000000009)
+  success !
+- catmark_tent              ( Catmark  ): 
+  delta ratio : (4077/12669 4494/12669 1483/12669)
+  average delta : (0.0000000044 0.0000000069 -0.0000000029)
+  success !
+- catmark_torus             ( Catmark  ): 
+  delta ratio : (15675/43680 20666/43680 15854/43680)
+  average delta : (-0.0000000028 -0.0000000006 -0.0000000032)
+  success !
+- catmark_torus_creases0    ( Catmark  ): 
+  delta ratio : (16403/43680 18625/43680 16458/43680)
+  average delta : (-0.0000000028 0.0000000095 -0.0000000030)
+  success !
+- catmark_helmet            ( Catmark  ): 
+  delta ratio : (27798/79995 27179/79995 25506/79995)
+  average delta : (0.0000000028 -0.0000000088 0.0000000019)
+  success !
+- catmark_lefthanded        ( Catmark  ): 
+  warning : vertex data not compared with Hbr (mesh is left-handed)
+- loop_cube_creases0        ( Loop     ): 
+  delta ratio : (2168/8202 2365/8202 2076/8202)
+  average delta : (0.0000000013 0.0000000200 0.0000000050)
+  success !
+- loop_cube_creases1        ( Loop     ): 
+  delta ratio : (2183/8202 2126/8202 929/8202)
+  average delta : (0.0000000030 -0.0000000039 -0.0000000250)
+  success !
+- loop_cube                 ( Loop     ): 
+  delta ratio : (0/16392 0/16392 0/16392)
+  average delta : (0.0000000000 0.0000000000 0.0000000000)
+  success !
+- loop_icosahedron          ( Loop     ): 
+  delta ratio : (4804/13662 4636/13662 4232/13662)
+  average delta : (0.0000000000 0.0000000003 0.0000000017)
+  success !
+- loop_pole8                ( Loop     ): 
+  delta ratio : (5397/16638 6726/16638 5150/16638)
+  average delta : (-0.0000000009 0.0000000503 0.0000000028)
+  success !
+- loop_pole64               ( Loop     ): 
+  delta ratio : (44464/133062 53063/133062 44730/133062)
+  average delta : (-0.0000000001 0.0000000522 -0.0000000001)
+  success !
+- loop_pole360              ( Loop     ): 
+  warning : vertex data not compared with Hbr (vertices of excessively high valence present)
+- loop_saddle_edgecorner    ( Loop     ): 
+  delta ratio : (613/2925 1234/2925 0/2925)
+  average delta : (0.0000000024 -0.0000000149 0.0000000000)
+  success !
+- loop_saddle_edgeonly      ( Loop     ): 
+  delta ratio : (771/2925 1398/2925 0/2925)
+  average delta : (0.0000000004 -0.0000000188 0.0000000000)
+  success !
+- loop_triangle_edgecorner  ( Loop     ): 
+  delta ratio : (0/34695 0/34695 0/34695)
+  average delta : (0.0000000000 0.0000000000 0.0000000000)
+  success !
+- loop_triangle_edgeonly    ( Loop     ): 
+  delta ratio : (0/24174 0/24174 0/24174)
+  average delta : (0.0000000000 0.0000000000 0.0000000000)
+  success !
+- loop_chaikin0             ( Loop     ): 
+  delta ratio : (4418/30042 0/30042 0/30042)
+  average delta : (0.0000000009 0.0000000000 0.0000000000)
+  success !
+- loop_chaikin1             ( Loop     ): 
+  warning : vertex data not compared with Hbr (assigned crease method is Chaikin)
+All tests passed.
+<end of output>
+Test time =   2.09 sec
+----------------------------------------------------------
+Test Passed.
+"far_perf" end time: Nov 21 22:16 UTC
+"far_perf" time elapsed: 00:00:02
+----------------------------------------------------------
+
+End testing: Nov 21 22:16 UTC

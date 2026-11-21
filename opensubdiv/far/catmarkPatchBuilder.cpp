@@ -11,6 +11,9 @@
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <vector>
 
 namespace OpenSubdiv {
 namespace OPENSUBDIV_VERSION {
@@ -1905,6 +1908,391 @@ LinearConverter<REAL>::Convert(Matrix & matrix) const {
 
 
 //
+//  Bezier change-of-basis for regular (BSpline) quad patches:
+//
+//  The curve-level relation between the OpenSubdiv uniform cubic bases is
+//
+//      B_bez(t) = M * B_bsp(t),   M (integer/6):
+//
+//          [  6,  0,  0,  0 ]
+//          [ -7,  2, -1,  2 ]
+//          [  2, -1,  2, -7 ]
+//          [  0,  0,  0,  6 ]
+//
+//  so the control-point map for a curve is Minv^T (integer/6):
+//
+//          [ 1, 4, 1, 0 ]
+//          [ 0, 4, 2, 0 ]
+//          [ 0, 2, 4, 0 ]
+//          [ 0, 1, 4, 1 ]
+//
+//  For a bicubic patch the 16x16 conversion is the tensor product of this
+//  map with itself: every Bezier control point (row) is a combination of
+//  the 16 BSpline control points (columns) with weights that are multiples
+//  of 1/6.  PatchBuilder fills missing boundary points by copying a
+//  boundary vertex into the phantom control-point slots, so this matrix is
+//  independent of the boundary mask -- the basis evaluator applies the
+//  usual phantom-weight redistribution to the Bezier weights to reproduce
+//  the native boundary surface exactly.
+//
+namespace {
+
+//
+//  Minv^T control-point map for a uniform cubic curve, row-major, stored as
+//  integer numerators: the actual weight of BSpline control point j when
+//  computing Bezier control point i is curveMap[4*i+j] / 6.
+//
+template <typename REAL>
+inline REAL const *
+getBSplineToBezierCurveMapNumerators() {
+    static REAL const curveMap[16] = {
+        1, 4, 1, 0,
+        0, 4, 2, 0,
+        0, 2, 4, 0,
+        0, 1, 4, 1
+    };
+    return curveMap;
+}
+
+//
+//  Populate a 16-row conversion matrix expressing the 16 Bezier control
+//  points in terms of the 16 BSpline control points of a regular quad
+//  patch, both ordered with the standard 4x4 layout (index = 4*tRow + sCol)
+//  used by the basis evaluators.
+//
+//  The matrix is the tensor product of the curve map with itself, so each
+//  tensor-product weight is the product of two numerators divided by 36.
+//  It is independent of the boundary mask: boundary patches have their
+//  phantom control-point slots filled with copies of boundary vertices and
+//  the basis evaluator applies the same phantom-weight redistribution for
+//  Bezier patches as it does for BSpline patches, which reproduces the
+//  native boundary surface exactly.
+//
+template <typename REAL>
+void
+buildRegularBSplineToBezierMatrix(SparseMatrix<REAL> & matrix) {
+
+    static int const NumPoints = 16;
+
+    REAL const * curveNum = getBSplineToBezierCurveMapNumerators<REAL>();
+    REAL const oneThirtySixth = REAL(1.0 / 36.0);
+
+    matrix.Resize(NumPoints, NumPoints, NumPoints * NumPoints);
+
+    for (int bezRow = 0; bezRow < NumPoints; ++bezRow) {
+        int tRow = bezRow / 4;
+        int sCol = bezRow - 4 * tRow;
+
+        StackBuffer<REAL, 16, true> fullRow(NumPoints);
+        std::memset(&fullRow[0], 0, NumPoints * sizeof(REAL));
+
+        for (int bT = 0; bT < 4; ++bT) {
+            REAL nT = curveNum[4*tRow + bT];
+            if (nT == REAL(0.0)) continue;
+
+            for (int bS = 0; bS < 4; ++bS) {
+                REAL nS = curveNum[4*sCol + bS];
+                if (nS == REAL(0.0)) continue;
+
+                fullRow[4*bT + bS] = (nT * nS) * oneThirtySixth;
+            }
+        }
+
+        int rowSize = 0;
+        for (int c = 0; c < NumPoints; ++c) {
+            if (fullRow[c] != REAL(0.0)) {
+                ++rowSize;
+            }
+        }
+
+        matrix.SetRowSize(bezRow, rowSize);
+        Array<int>  dstIndices = matrix.SetRowColumns(bezRow);
+        Array<REAL> dstWeights = matrix.SetRowElements(bezRow);
+
+        int next = 0;
+        for (int c = 0; c < NumPoints; ++c) {
+            if (fullRow[c] != REAL(0.0)) {
+                dstIndices[next] = c;
+                dstWeights[next] = fullRow[c];
+                ++next;
+            }
+        }
+    }
+}
+
+} // end unnamed namespace
+
+//
+//  BezierConverter
+//
+//  Produces the 16 control points of a bicubic Bezier patch for an
+//  irregular (non-isolated) Catmark patch, which has no exact single-patch
+//  polynomial representation.  The 20-point Gregory patch is built first and
+//  its 12 boundary control points are reused directly (they coincide with
+//  the Bezier boundary points), while the four interior Bezier points are
+//  the averages of the corresponding rational pairs of Gregory face points.
+//  This is the standard well-defined Gregory -> Bezier conversion: the
+//  corner points, edge curves and orientation of the Gregory patch are
+//  preserved exactly -- only the interior rational blending is replaced by
+//  its position-independent average.
+//
+template <typename REAL>
+class BezierConverter {
+public:
+    typedef REAL                    Weight;
+    typedef SparseMatrix<Weight>    Matrix;
+
+    //  Number of control points of a bicubic Bezier patch
+    static int const NumBezierPoints = 16;
+
+    //  Number of control points of a cubic Gregory patch
+    static int const NumGregoryPoints = 20;
+
+public:
+    BezierConverter() : _sourcePatch(0) { }
+    BezierConverter(SourcePatch const & sourcePatch);
+    BezierConverter(SourcePatch const & sourcePatch, Matrix & sparseMatrix);
+
+    void Initialize(SourcePatch const & sourcePatch);
+    void Convert(Matrix & matrix) const;
+
+private:
+    //  Gregory -> Bezier conversion for an irregular patch
+    void convertFromGregory(Matrix const & gregoryMatrix, Matrix & matrix) const;
+
+    //  Exact conversion for a patch that has a BSpline representation
+    //  (regular or isolated-interior extraordinary): compose the BSpline
+    //  conversion with the exact BSpline -> Bezier change of basis.
+    void convertFromBSpline(Matrix const & bsplineMatrix, Matrix & matrix) const;
+
+private:
+    SourcePatch const *    _sourcePatch;
+    GregoryConverter<REAL> _gregoryConverter;
+    BSplineConverter<REAL> _bsplineConverter;
+};
+
+template <typename REAL>
+BezierConverter<REAL>::BezierConverter(SourcePatch const & sourcePatch) {
+
+    Initialize(sourcePatch);
+}
+template <typename REAL>
+BezierConverter<REAL>::BezierConverter(SourcePatch const & sourcePatch,
+                                       Matrix & matrix) {
+
+    Initialize(sourcePatch);
+    Convert(matrix);
+}
+
+template <typename REAL>
+void
+BezierConverter<REAL>::Initialize(SourcePatch const & sourcePatch) {
+
+    _sourcePatch = &sourcePatch;
+    _gregoryConverter.Initialize(sourcePatch);
+    _bsplineConverter.Initialize(sourcePatch);
+}
+
+template <typename REAL>
+void
+BezierConverter<REAL>::Convert(Matrix & matrix) const {
+
+    if (_gregoryConverter.IsIsolatedInteriorPatch()) {
+        //
+        //  An isolated interior extraordinary patch (a single non-boundary
+        //  extraordinary corner) has an exact 16-point BSpline
+        //  representation, so the BSpline -> Bezier change of basis applies
+        //  exactly and the resulting Bezier patch reproduces the limit
+        //  surface without any Gregory-style interior approximation.
+        //
+        Matrix bsplineMatrix;
+        _bsplineConverter.Convert(bsplineMatrix);
+
+        convertFromBSpline(bsplineMatrix, matrix);
+    } else {
+        //
+        //  General irregular neighborhoods are represented by a Gregory
+        //  patch -- convert to the 16 Bezier points via boundary reuse and
+        //  averaging of the interior rational face-point pairs.
+        //
+        Matrix gregoryMatrix;
+        _gregoryConverter.Convert(gregoryMatrix);
+
+        convertFromGregory(gregoryMatrix, matrix);
+    }
+}
+
+//
+//  Compose the source -> BSpline matrix B with the exact BSpline -> Bezier
+//  change of basis C, producing Q = C * B (16 rows, same columns as B).
+//
+template <typename REAL>
+void
+BezierConverter<REAL>::convertFromBSpline(Matrix const & B,
+                                          Matrix & Q) const {
+
+    Matrix basisChange;
+    buildRegularBSplineToBezierMatrix(basisChange);
+
+    int numColumns = B.GetNumColumns();
+
+    Q.Resize(NumBezierPoints, numColumns,
+             basisChange.GetNumElements() * B.GetNumRows());
+
+    std::vector<REAL> fullRow(numColumns, REAL(0.0));
+
+    for (int bezRow = 0; bezRow < NumBezierPoints; ++bezRow) {
+        std::fill(fullRow.begin(), fullRow.end(), REAL(0.0));
+
+        ConstArray<int>  cIndices = basisChange.GetRowColumns(bezRow);
+        ConstArray<REAL> cWeights = basisChange.GetRowElements(bezRow);
+        for (int k = 0; k < cIndices.size(); ++k) {
+            int bsplineRow = cIndices[k];
+            REAL scale = cWeights[k];
+
+            ConstArray<int>  srcIndices = B.GetRowColumns(bsplineRow);
+            ConstArray<REAL> srcWeights = B.GetRowElements(bsplineRow);
+            for (int j = 0; j < srcIndices.size(); ++j) {
+                fullRow[srcIndices[j]] += scale * srcWeights[j];
+            }
+        }
+
+        int rowSize = 0;
+        for (int c = 0; c < numColumns; ++c) {
+            if (fullRow[c] != REAL(0.0)) {
+                ++rowSize;
+            }
+        }
+
+        Q.SetRowSize(bezRow, rowSize);
+        Array<int>  dstIndices = Q.SetRowColumns(bezRow);
+        Array<REAL> dstWeights = Q.SetRowElements(bezRow);
+
+        int next = 0;
+        for (int c = 0; c < numColumns; ++c) {
+            if (fullRow[c] != REAL(0.0)) {
+                dstIndices[next] = c;
+                dstWeights[next] = fullRow[c];
+                ++next;
+            }
+        }
+    }
+}
+
+template <typename REAL>
+void
+BezierConverter<REAL>::convertFromGregory(Matrix const & G, Matrix & Q) const {
+
+    //
+    //  The 20 Gregory points are ordered as five points per corner while the
+    //  16 Bezier points are ordered as a 4x4 grid (index = 4*tRow + sCol).
+    //
+    //  The 12 boundary Bezier points are identical to Gregory boundary
+    //  points.  The mapping below mirrors the basis-weight tables used by
+    //  EvalBasisGregory (boundaryGregory/boundaryBezSCol/boundaryBezTRow):
+    //
+    //      Bezier index   Gregory point
+    //          0              G[0]    (P0)
+    //          1              G[1]    (e0+)
+    //          2              G[7]    (e1-)
+    //          3              G[5]    (P1)
+    //          4              G[2]    (e0-)
+    //          7              G[6]    (e1+)
+    //          8              G[16]   (e3+)
+    //         11              G[12]   (e2-)
+    //         12              G[15]   (P3)
+    //         13              G[17]   (e3-)
+    //         14              G[11]   (e2+)
+    //         15              G[10]   (P2)
+    //
+    static int const gregoryBoundaryForBezier[16] = {
+         0,  1,  7,  5,
+         2, -1, -1,  6,
+        16, -1, -1, 12,
+        15, 17, 11, 10
+    };
+
+    //
+    //  Each interior Bezier point is the average of the pair of Gregory
+    //  face points that rationally blend to form it (the pair sums to a
+    //  unit partition of unity for every (s,t)):
+    //
+    //      Bezier 5  <-  (G[3],  G[4])
+    //      Bezier 6  <-  (G[8],  G[9])
+    //      Bezier 9  <-  (G[18], G[19])
+    //      Bezier 10 <-  (G[13], G[14])
+    //
+    static int const gregoryInteriorPairForBezier[16][2] = {
+        { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 },
+        { -1, -1 }, {  3,  4 }, {  8,  9 }, { -1, -1 },
+        { -1, -1 }, { 18, 19 }, { 13, 14 }, { -1, -1 },
+        { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }
+    };
+
+    int numColumns = G.GetNumColumns();
+
+    //  Every Bezier row references at most the union of two Gregory rows.
+    int maxElements = 0;
+    for (int i = 0; i < NumGregoryPoints; ++i) {
+        maxElements += G.GetRowSize(i);
+    }
+    Q.Resize(NumBezierPoints, numColumns, maxElements);
+
+    std::vector<REAL> fullRow(numColumns, REAL(0.0));
+
+    for (int bezRow = 0; bezRow < NumBezierPoints; ++bezRow) {
+
+        std::fill(fullRow.begin(), fullRow.end(), REAL(0.0));
+
+        int boundaryGregoryRow = gregoryBoundaryForBezier[bezRow];
+        int interiorGregoryRow0 = gregoryInteriorPairForBezier[bezRow][0];
+        int interiorGregoryRow1 = gregoryInteriorPairForBezier[bezRow][1];
+
+        if (boundaryGregoryRow >= 0) {
+            //  Exact reuse of the Gregory boundary point:
+            ConstArray<int>  srcIndices = G.GetRowColumns(boundaryGregoryRow);
+            ConstArray<REAL> srcWeights = G.GetRowElements(boundaryGregoryRow);
+            for (int k = 0; k < srcIndices.size(); ++k) {
+                fullRow[srcIndices[k]] += srcWeights[k];
+            }
+        } else {
+            //  Average the rational face-point pair:
+            for (int pair = 0; pair < 2; ++pair) {
+                int gregoryRow = (pair == 0) ? interiorGregoryRow0
+                                             : interiorGregoryRow1;
+                ConstArray<int>  srcIndices = G.GetRowColumns(gregoryRow);
+                ConstArray<REAL> srcWeights = G.GetRowElements(gregoryRow);
+                for (int k = 0; k < srcIndices.size(); ++k) {
+                    fullRow[srcIndices[k]] +=
+                        REAL(0.5) * srcWeights[k];
+                }
+            }
+        }
+
+        int rowSize = 0;
+        for (int c = 0; c < numColumns; ++c) {
+            if (fullRow[c] != REAL(0.0)) {
+                ++rowSize;
+            }
+        }
+
+        Q.SetRowSize(bezRow, rowSize);
+        Array<int>  dstIndices = Q.SetRowColumns(bezRow);
+        Array<REAL> dstWeights = Q.SetRowElements(bezRow);
+
+        int next = 0;
+        for (int c = 0; c < numColumns; ++c) {
+            if (fullRow[c] != REAL(0.0)) {
+                dstIndices[next] = c;
+                dstWeights[next] = fullRow[c];
+                ++next;
+            }
+        }
+    }
+}
+
+
+//
 //  Internal utilities more relevant to the CatmarkPatchBuilder:
 //
 namespace {
@@ -1918,7 +2306,7 @@ namespace {
             PatchDescriptor::REGULAR,        // regular
             PatchDescriptor::GREGORY_BASIS,  // Gregory
             PatchDescriptor::QUADS,          // linear
-            PatchDescriptor::NON_PATCH       // Bezier -- for future use
+            PatchDescriptor::BEZIER          // Bezier
     };
 }
 
@@ -1942,6 +2330,8 @@ CatmarkPatchBuilder::convertSourcePatch(SourcePatch const &   sourcePatch,
         BSplineConverter<REAL>(sourcePatch, matrix);
     } else if (patchType == PatchDescriptor::QUADS) {
         LinearConverter<REAL>(sourcePatch, matrix);
+    } else if (patchType == PatchDescriptor::BEZIER) {
+        BezierConverter<REAL>(sourcePatch, matrix);
     } else {
         assert("Unknown or unsupported patch type" == 0);
     }
@@ -1959,6 +2349,31 @@ CatmarkPatchBuilder::convertToPatchType(SourcePatch const &    sourcePatch,
                                         PatchDescriptor::Type  patchType,
                                         SparseMatrix<double> & matrix) const {
     return convertSourcePatch(sourcePatch, patchType, matrix);
+}
+
+int
+CatmarkPatchBuilder::convertRegularPatchToPatchType(
+        PatchDescriptor::Type patchType, int /*regBoundaryMask*/,
+        SparseMatrix<float> & matrix) const {
+
+    if (patchType != PatchDescriptor::BEZIER) {
+        return PatchBuilder::convertRegularPatchToPatchType(
+            patchType, 0, matrix);
+    }
+    buildRegularBSplineToBezierMatrix(matrix);
+    return matrix.GetNumRows();
+}
+int
+CatmarkPatchBuilder::convertRegularPatchToPatchType(
+        PatchDescriptor::Type patchType, int /*regBoundaryMask*/,
+        SparseMatrix<double> & matrix) const {
+
+    if (patchType != PatchDescriptor::BEZIER) {
+        return PatchBuilder::convertRegularPatchToPatchType(
+            patchType, 0, matrix);
+    }
+    buildRegularBSplineToBezierMatrix(matrix);
+    return matrix.GetNumRows();
 }
 
 CatmarkPatchBuilder::CatmarkPatchBuilder(

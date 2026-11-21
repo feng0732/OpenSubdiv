@@ -40,7 +40,8 @@ public:
             ENDCAP_BILINEAR_BASIS,  ///< use linear patches (simple quads or tris)
             ENDCAP_BSPLINE_BASIS,   ///< use BSpline-like patches (same patch type as regular)
             ENDCAP_GREGORY_BASIS,   ///< use Gregory patches (highest quality, recommended default)
-            ENDCAP_LEGACY_GREGORY   ///< legacy option for 2.x style Gregory patches (Catmark only)
+            ENDCAP_LEGACY_GREGORY,  ///< legacy option for 2.x style Gregory patches (Catmark only)
+            ENDCAP_BEZIER_BASIS     ///< use bicubic Bezier patches (Catmark quads only)
         };
 
         Options(unsigned int maxIsolation=10) :
@@ -68,7 +69,7 @@ public:
         EndCapType GetEndCapType() const { return (EndCapType)endCapType; }
 
         /// \brief Set endcap basis type
-        void SetEndCapType(EndCapType e) { endCapType = e & 0x7; }
+        void SetEndCapType(EndCapType e) { endCapType = e & 0xf; }
 
         /// \brief Set maximum isolation level
         void SetMaxIsolationLevel(unsigned int level) { maxIsolationLevel = level & 0xf; }
@@ -100,7 +101,7 @@ public:
                      maxIsolationLevel    : 4, ///< Cap adaptive feature isolation to the given level (max. 10)
 
                      // end-capping
-                     endCapType              : 3, ///< EndCapType
+                     endCapType              : 4, ///< EndCapType
                      shareEndCapPatchPoints  : 1, ///< Share endcap patch points among adjacent endcap patches.
                                                   ///< currently only work with GregoryBasis.
 

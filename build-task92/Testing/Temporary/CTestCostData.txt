@@ -1,0 +1,7 @@
+bfr_evaluate_pos 3 0.123769
+bfr_evaluate_uv1 3 0.148573
+bfr_evaluate_uv5 3 0.100894
+far_regression 3 0.718399
+far_bezier 3 0.010371
+far_perf 3 0.696852
+---
